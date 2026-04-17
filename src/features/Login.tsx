@@ -9,11 +9,13 @@ import {
   ChevronRight,
   User
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/src/components/ui/Card';
-import { Button } from '@/src/components/ui/Button';
-import { Input } from '@/src/components/ui/Input';
-import { Label } from '@/src/components/ui/Label';
-import { cn } from '@/src/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
+import { cn } from '../lib/utils';
+// TODO: Uncomment and use the logo below when logo.svg is available in src/assets/brand/
+// import logo from '../assets/brand/logo.svg';
 
 interface LoginProps {
   onLogin: () => void;
@@ -41,9 +43,12 @@ export const Login = ({ onLogin }: LoginProps) => {
       
       <div className="w-full max-w-md space-y-8 relative z-10">
         <div className="text-center space-y-4">
+          {/* LOGO PLACEHOLDER: Replace TrendingUp icon with actual logo when available */}
+          {/* To use logo: import logo from '../assets/brand/logo.svg' and replace this div */}
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl premium-gradient shadow-2xl shadow-primary/30 mb-4 animate-bounce">
             <TrendingUp className="w-10 h-10 text-black" />
           </div>
+          {/* LOGO PLACEHOLDER: Replace div above with: <img src={logo} alt="LIFE Trade Logo" className="w-16 h-16 object-contain" /> */}
           <h1 className="text-4xl font-bold tracking-tighter premium-text">LIFE TRADE</h1>
           <p className="text-muted-foreground text-sm uppercase tracking-[0.3em] font-bold">Premium Operational Suite</p>
         </div>

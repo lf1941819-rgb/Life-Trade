@@ -15,7 +15,7 @@ import {
   Zap,
   X
 } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { cn } from '../lib/utils';
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -83,9 +83,12 @@ export const Sidebar = ({ activeTab, setActiveTab, onLogout, isMobile }: Sidebar
     >
       <div className={cn("p-8 flex items-center justify-between", isMobile && "pb-4")}>
         <div className="flex items-center gap-4">
+          {/* LOGO PLACEHOLDER: Replace Zap icon with actual logo when available */}
+          {/* To use logo: import logo from '../assets/brand/logo.svg' and replace the icon */}
           <div className="w-10 h-10 rounded-xl premium-gradient flex items-center justify-center shadow-2xl shadow-primary/30 rotate-3 hover:rotate-0 transition-transform duration-500 cursor-pointer" onClick={() => !isMobile && setCollapsed(!collapsed)}>
             <Zap className="w-6 h-6 text-black" />
           </div>
+          {/* LOGO PLACEHOLDER: Replace div above with: <img src={logo} alt="LIFE Trade" className="w-10 h-10 rounded-xl hover:rotate-0 transition-transform duration-500 cursor-pointer" /> */}
           {(!collapsed || isMobile) && (
             <div className="flex flex-col">
               <span className="font-bold text-xl tracking-tighter premium-text font-display">LIFE</span>
