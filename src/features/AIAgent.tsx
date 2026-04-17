@@ -77,36 +77,29 @@ export const AIAgent = ({ onNavigate }: { onNavigate?: (tab: string) => void }) 
     setIsTyping(true);
 
     try {
-      const systemInstruction = "Você é o LIFE Core, a inteligência central do LIFE Trade. Sua voz é calma, profissional, altamente técnica e focada em resultados institucionais. Você ajuda traders a manterem a disciplina e a evoluírem seus lotes de forma matemática.";
-
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: [
-            { role: 'user', parts: [{ text: systemInstruction }] },
-            ...messages.map(msg => ({
-              role: msg.role === 'assistant' ? 'model' : 'user',
-              parts: [{ text: msg.content }]
-            })),
-            { role: 'user', parts: [{ text: inputValue }] }
-          ]
-        })
+          prompt: inputValue.trim(),
+        }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to get AI response');
+        throw new Error(data?.error || 'Failed to get AI response');
       }
 
-      const data = await response.json();
+      const aiText = data.text;
 
       const assistantMessage: AIChatMessage = {
         id: (Date.now() + 1).toString(),
         userId: 'user1',
         role: 'assistant',
-        content: data.text || "Desculpe, tive um problema ao processar sua solicitação institucional.",
+        content: aiText || "Desculpe, tive um problema ao processar sua solicitação institucional.",
         timestamp: Date.now(),
       };
 
