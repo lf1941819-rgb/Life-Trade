@@ -14,7 +14,7 @@ export default defineConfig(({mode}) => {
             'vendor-react': ['react', 'react-dom'],
             'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
             'vendor-charts': ['recharts'],
-            'vendor-ui': ['framer-motion', 'lucide-react', 'clsx', 'tailwind-merge', 'motion'],
+            'vendor-ui': ['framer-motion', 'lucide-react', 'clsx', 'tailwind-merge'],
             'vendor-utils': ['date-fns', 'react-markdown'],
           },
         },
