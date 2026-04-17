@@ -10,7 +10,7 @@ import {
   serverTimestamp,
   orderBy
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { db } from '../firebase';
 import { Goal } from '../../types';
 
 const COLLECTION_NAME = 'goals';
@@ -29,7 +29,8 @@ export const goalService = {
       })) as Goal[];
       callback(goals);
     }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, COLLECTION_NAME);
+      console.error('goalService error:', error);
+      throw error;
     });
   },
 
@@ -42,7 +43,8 @@ export const goalService = {
       });
       return docRef.id;
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, COLLECTION_NAME);
+      console.error('goalService error:', error);
+      throw error;
     }
   },
 
@@ -54,7 +56,8 @@ export const goalService = {
         updatedAt: serverTimestamp()
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `${COLLECTION_NAME}/${id}`);
+      console.error('goalService error:', error);
+      throw error;
     }
   },
 
@@ -63,7 +66,8 @@ export const goalService = {
       const docRef = doc(db, COLLECTION_NAME, id);
       await deleteDoc(docRef);
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `${COLLECTION_NAME}/${id}`);
+      console.error('goalService error:', error);
+      throw error;
     }
   }
 };

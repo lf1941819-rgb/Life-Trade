@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { auth } from '@/src/lib/firebase';
-import { CalendarEvent } from '@/src/types';
-import { eventService } from '@/src/lib/services/eventService';
+import { auth } from '../lib/firebase';
+import { CalendarEvent } from '../types';
+import { eventService } from '../lib/services/eventService';
 
 export function useEvents() {
   const [events, setEvents] = React.useState<CalendarEvent[]>([]);

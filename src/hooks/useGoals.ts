@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { auth } from '@/src/lib/firebase';
-import { Goal } from '@/src/types';
-import { goalService } from '@/src/lib/services/goalService';
+import { auth } from '../lib/firebase';
+import { Goal } from '../types';
+import { goalService } from '../lib/services/goalService';
 
 export function useGoals() {
   const [goals, setGoals] = React.useState<Goal[]>([]);

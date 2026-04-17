@@ -12,7 +12,7 @@ import {
   serverTimestamp,
   orderBy
 } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from '../firebase';
+import { db } from '../firebase';
 import { Instrument } from '../../types/calculations';
 import { INSTRUMENT_PRESETS } from '../calculations/instrumentModels';
 
@@ -28,7 +28,8 @@ export const instrumentService = {
         }
       }
     } catch (error) {
-      handleFirestoreError(error, OperationType.LIST, COLLECTION_NAME);
+      console.error('instrumentService error:', error);
+      throw error;
     }
   },
 
@@ -41,7 +42,8 @@ export const instrumentService = {
       });
       return docRef.id;
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, COLLECTION_NAME);
+      console.error('instrumentService error:', error);
+      throw error;
     }
   },
 
@@ -53,7 +55,8 @@ export const instrumentService = {
         updatedAt: Date.now()
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `${COLLECTION_NAME}/${id}`);
+      console.error('instrumentService error:', error);
+      throw error;
     }
   },
 
@@ -62,7 +65,8 @@ export const instrumentService = {
       const docRef = doc(db, COLLECTION_NAME, id);
       await deleteDoc(docRef);
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `${COLLECTION_NAME}/${id}`);
+      console.error('instrumentService error:', error);
+      throw error;
     }
   },
 
@@ -76,7 +80,8 @@ export const instrumentService = {
         await this.createInstrument(preset as Instrument);
       }
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, COLLECTION_NAME);
+      console.error('instrumentService error:', error);
+      throw error;
     }
   },
 
@@ -89,7 +94,8 @@ export const instrumentService = {
       })) as Instrument[];
       callback(instruments);
     }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, COLLECTION_NAME);
+      console.error('instrumentService error:', error);
+      throw error;
     });
   }
 };

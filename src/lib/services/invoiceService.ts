@@ -10,7 +10,7 @@ import {
   serverTimestamp,
   orderBy
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { db } from '../firebase';
 import { Invoice } from '../../types';
 
 const COLLECTION_NAME = 'invoices';
@@ -30,7 +30,8 @@ export const invoiceService = {
       })) as Invoice[];
       callback(invoices);
     }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, COLLECTION_NAME);
+      console.error('invoiceService error:', error);
+      throw error;
     });
   },
 
@@ -43,7 +44,8 @@ export const invoiceService = {
       });
       return docRef.id;
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, COLLECTION_NAME);
+      console.error('invoiceService error:', error);
+      throw error;
     }
   },
 
@@ -55,7 +57,8 @@ export const invoiceService = {
         updatedAt: serverTimestamp()
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `${COLLECTION_NAME}/${id}`);
+      console.error('invoiceService error:', error);
+      throw error;
     }
   },
 
@@ -64,7 +67,8 @@ export const invoiceService = {
       const docRef = doc(db, COLLECTION_NAME, id);
       await deleteDoc(docRef);
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `${COLLECTION_NAME}/${id}`);
+      console.error('invoiceService error:', error);
+      throw error;
     }
   }
 };

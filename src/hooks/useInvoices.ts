@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { auth } from '@/src/lib/firebase';
-import { Invoice } from '@/src/types';
-import { invoiceService } from '@/src/lib/services/invoiceService';
+import { auth } from '../lib/firebase';
+import { Invoice } from '../types';
+import { invoiceService } from '../lib/services/invoiceService';
 
 export function useInvoices() {
   const [invoices, setInvoices] = React.useState<Invoice[]>([]);

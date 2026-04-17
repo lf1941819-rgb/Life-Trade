@@ -1,96 +1,169 @@
-
-import { 
-  collection, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  getDocs, 
-  query, 
-  where, 
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
   onSnapshot,
   orderBy,
-  limit
 } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from '../firebase';
-import { Operation, OperationStatus } from '../../types/calculations';
+import { db } from '../firebase';
+import { Operation } from '../../types/calculations';
 
-const COLLECTION_NAME = 'operations';
+const USERS_COLLECTION = 'users';
+const OPERATIONS_COLLECTION = 'operations';
+
+type OperationAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LIST';
+
+function handleOperationError(
+  error: unknown,
+  action: OperationAction,
+  target: string
+): never {
+  console.error(`[operationService:${action}] Error on ${target}`, error);
+
+  if (error instanceof Error) {
+    throw new Error(`[operationService:${action}] ${error.message}`);
+  }
+
+  throw new Error(`[operationService:${action}] Unknown error on ${target}`);
+}
+
+function getOperationsCollectionRef(userId: string) {
+  return collection(db, USERS_COLLECTION, userId, OPERATIONS_COLLECTION);
+}
+
+function getOperationDocRef(userId: string, operationId: string) {
+  return doc(db, USERS_COLLECTION, userId, OPERATIONS_COLLECTION, operationId);
+}
 
 export const operationService = {
-  async createOperation(operation: Omit<Operation, 'id' | 'createdAt' | 'updatedAt'>) {
+  async createOperation(
+    userId: string,
+    operation: Omit<Operation, 'id' | 'createdAt' | 'updatedAt' | 'userId'>
+  ): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+      const now = Date.now();
+
+      const docRef = await addDoc(getOperationsCollectionRef(userId), {
         ...operation,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
+        userId,
+        createdAt: now,
+        updatedAt: now,
       });
+
       return docRef.id;
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, COLLECTION_NAME);
+      handleOperationError(
+        error,
+        'CREATE',
+        `${USERS_COLLECTION}/${userId}/${OPERATIONS_COLLECTION}`
+      );
     }
   },
 
-  async updateOperation(id: string, operation: Partial<Operation>) {
+  async updateOperation(
+    userId: string,
+    operationId: string,
+    operation: Partial<Operation>
+  ): Promise<void> {
     try {
-      const docRef = doc(db, COLLECTION_NAME, id);
+      const docRef = getOperationDocRef(userId, operationId);
+
+      const { id, userId: _, createdAt, ...safeUpdate } = operation;
+
       await updateDoc(docRef, {
-        ...operation,
-        updatedAt: Date.now()
+        ...safeUpdate,
+        updatedAt: Date.now(),
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `${COLLECTION_NAME}/${id}`);
+      handleOperationError(
+        error,
+        'UPDATE',
+        `${USERS_COLLECTION}/${userId}/${OPERATIONS_COLLECTION}/${operationId}`
+      );
     }
   },
 
-  async deleteOperation(id: string) {
+  async deleteOperation(userId: string, operationId: string): Promise<void> {
     try {
-      const docRef = doc(db, COLLECTION_NAME, id);
+      const docRef = getOperationDocRef(userId, operationId);
       await deleteDoc(docRef);
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `${COLLECTION_NAME}/${id}`);
+      handleOperationError(
+        error,
+        'DELETE',
+        `${USERS_COLLECTION}/${userId}/${OPERATIONS_COLLECTION}/${operationId}`
+      );
     }
   },
 
-  async closeOperation(id: string, status: 'GAIN' | 'LOSS', moneyResult: number, exitPrice?: number) {
+  async closeOperation(
+    userId: string,
+    operationId: string,
+    status: 'GAIN' | 'LOSS',
+    moneyResult: number,
+    exitPrice?: number
+  ): Promise<void> {
     try {
-      const docRef = doc(db, COLLECTION_NAME, id);
+      const docRef = getOperationDocRef(userId, operationId);
+
       await updateDoc(docRef, {
         status,
         moneyResult,
-        exitPrice,
-        updatedAt: Date.now()
+        ...(exitPrice !== undefined ? { exitPrice } : {}),
+        updatedAt: Date.now(),
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `${COLLECTION_NAME}/${id}`);
+      handleOperationError(
+        error,
+        'UPDATE',
+        `${USERS_COLLECTION}/${userId}/${OPERATIONS_COLLECTION}/${operationId}`
+      );
     }
   },
 
-  subscribeToOperations(userId: string, callback: (operations: Operation[]) => void) {
+  subscribeToOperations(
+    userId: string,
+    callback: (operations: Operation[]) => void
+  ) {
     const q = query(
-      collection(db, COLLECTION_NAME), 
-      where('userId', '==', userId),
+      getOperationsCollectionRef(userId),
       orderBy('createdAt', 'desc')
     );
-    return onSnapshot(q, (snapshot) => {
-      const operations = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Operation[];
-      callback(operations);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, COLLECTION_NAME);
-    });
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const operations = snapshot.docs.map((docSnapshot) => ({
+          id: docSnapshot.id,
+          ...docSnapshot.data(),
+        })) as Operation[];
+
+        callback(operations);
+      },
+      (error) => {
+        console.error(
+          `[operationService:LIST] Error on users/${userId}/operations`,
+          error
+        );
+        callback([]);
+      }
+    );
   },
 
   async getOperationCount(userId: string): Promise<number> {
     try {
-      const q = query(collection(db, COLLECTION_NAME), where('userId', '==', userId));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(getOperationsCollectionRef(userId));
       return snapshot.size;
     } catch (error) {
-      handleFirestoreError(error, OperationType.LIST, COLLECTION_NAME);
+      console.error(
+        `[operationService:LIST] Error counting users/${userId}/operations`,
+        error
+      );
       return 0;
     }
-  }
+  },
 };
