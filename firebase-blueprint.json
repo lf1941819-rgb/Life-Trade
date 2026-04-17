@@ -1,0 +1,163 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User's personal settings and preferences.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "mainCurrency": { "type": "string" },
+        "theme": { "type": "string", "enum": ["dark"] }
+      },
+      "required": ["id", "name", "email", "mainCurrency"]
+    },
+    "Asset": {
+      "title": "Asset",
+      "description": "Financial asset configuration.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["Gold", "Stocks", "Oil", "Forex"] },
+        "baseCurrency": { "type": "string" },
+        "pointValue": { "type": "number" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "name", "category", "baseCurrency", "pointValue", "active"]
+    },
+    "Operation": {
+      "title": "Operation",
+      "description": "A single trading operation (trade).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "assetId": { "type": "string" },
+        "type": { "type": "string", "enum": ["Buy", "Sell"] },
+        "points": { "type": "number" },
+        "lotUsed": { "type": "number" },
+        "currency": { "type": "string" },
+        "financialValue": { "type": "number" },
+        "observation": { "type": "string" },
+        "setup": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "result": { "type": "string", "enum": ["Profit", "Loss"] },
+        "status": { "type": "string", "enum": ["Closed", "Open"] },
+        "emotionalState": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "userId", "date", "time", "assetId", "type", "points", "lotUsed", "currency", "financialValue", "result", "status", "createdAt"]
+    },
+    "Goal": {
+      "title": "Goal",
+      "description": "Trading goals for different periods.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "period": { "type": "string", "enum": ["Daily", "Weekly", "Monthly"] },
+        "pointsGoal": { "type": "number" },
+        "valueGoal": { "type": "number" },
+        "currency": { "type": "string" },
+        "pointsPerOperation": { "type": "number" }
+      },
+      "required": ["id", "userId", "period", "pointsGoal", "valueGoal", "currency", "pointsPerOperation"]
+    },
+    "LotProgressionSettings": {
+      "title": "Lot Progression Settings",
+      "description": "Rules for lot size progression.",
+      "type": "object",
+      "properties": {
+        "initialLot": { "type": "number" },
+        "increment": { "type": "number" },
+        "operationsPerCycle": { "type": "number" },
+        "totalOperations": { "type": "number" },
+        "currentLot": { "type": "number" }
+      },
+      "required": ["initialLot", "increment", "operationsPerCycle", "totalOperations", "currentLot"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Daily operational notes or invoices.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "number": { "type": "string" },
+        "value": { "type": "number" },
+        "currency": { "type": "string" },
+        "description": { "type": "string" },
+        "relatedOperationId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Paid", "Pending", "Cancelled"] }
+      },
+      "required": ["id", "userId", "date", "number", "value", "currency", "description", "status"]
+    },
+    "CalendarEvent": {
+      "title": "Calendar Event",
+      "description": "Trading schedule events.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "type": { "type": "string", "enum": ["Market Opening", "Review", "Economic Event", "Personal"] },
+        "observation": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "date", "time", "type"]
+    },
+    "AIChatMessage": {
+      "title": "AI Chat Message",
+      "description": "Conversation history with the AI agent.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "assistant"] },
+        "content": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "userId", "role", "content", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document."
+    },
+    "/users/{userId}/assets/{assetId}": {
+      "schema": "Asset",
+      "description": "User's configured assets."
+    },
+    "/users/{userId}/operations/{operationId}": {
+      "schema": "Operation",
+      "description": "User's trading operations."
+    },
+    "/users/{userId}/goals/{goalId}": {
+      "schema": "Goal",
+      "description": "User's trading goals."
+    },
+    "/users/{userId}/progression/settings": {
+      "schema": "LotProgressionSettings",
+      "description": "User's lot progression rules."
+    },
+    "/users/{userId}/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "User's operational invoices."
+    },
+    "/users/{userId}/events/{eventId}": {
+      "schema": "CalendarEvent",
+      "description": "User's calendar events."
+    },
+    "/users/{userId}/aiChats/{chatId}": {
+      "schema": "AIChatMessage",
+      "description": "User's AI chat history."
+    }
+  }
+}
