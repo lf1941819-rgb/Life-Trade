@@ -23,14 +23,13 @@ import {
   Info,
   History
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/src/components/ui/Card';
-import { Button } from '@/src/components/ui/Button';
-import { Input } from '@/src/components/ui/Input';
-import { Badge } from '@/src/components/ui/Badge';
-import { cn } from '@/src/lib/utils';
-import { AIChatMessage } from '@/src/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Badge } from '../components/ui/Badge';
+import { cn } from '../lib/utils';
+import { AIChatMessage } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GoogleGenAI } from "@google/genai";
 
 const initialMessages: AIChatMessage[] = [
   {
@@ -51,7 +50,6 @@ const suggestedQuestions = [
 ];
 
 export const AIAgent = ({ onNavigate }: { onNavigate?: (tab: string) => void }) => {
-  const ai = React.useMemo(() => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }), []);
   const [messages, setMessages] = React.useState<AIChatMessage[]>(initialMessages);
   const [inputValue, setInputValue] = React.useState('');
   const [isTyping, setIsTyping] = React.useState(false);
@@ -81,23 +79,34 @@ export const AIAgent = ({ onNavigate }: { onNavigate?: (tab: string) => void }) 
     try {
       const systemInstruction = "Você é o LIFE Core, a inteligência central do LIFE Trade. Sua voz é calma, profissional, altamente técnica e focada em resultados institucionais. Você ajuda traders a manterem a disciplina e a evoluírem seus lotes de forma matemática.";
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [
-          { role: 'user', parts: [{ text: systemInstruction }] },
-          ...messages.map(msg => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.content }]
-          })),
-          { role: 'user', parts: [{ text: inputValue }] }
-        ]
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: 'user', parts: [{ text: systemInstruction }] },
+            ...messages.map(msg => ({
+              role: msg.role === 'assistant' ? 'model' : 'user',
+              parts: [{ text: msg.content }]
+            })),
+            { role: 'user', parts: [{ text: inputValue }] }
+          ]
+        })
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const data = await response.json();
 
       const assistantMessage: AIChatMessage = {
         id: (Date.now() + 1).toString(),
         userId: 'user1',
         role: 'assistant',
-        content: response.text || "Desculpe, tive um problema ao processar sua solicitação institucional.",
+        content: data.text || "Desculpe, tive um problema ao processar sua solicitação institucional.",
         timestamp: Date.now(),
       };
 
